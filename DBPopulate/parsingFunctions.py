@@ -1,7 +1,8 @@
 import json
-from os import system
 import psycopg2
 from flatten_json import flatten
+import sys
+
 
 def cleanStr4SQL(s):
     return s.replace("'","`").replace("\n"," ")
@@ -17,27 +18,25 @@ def usersTableParse():
     with open('yelp_user.JSON', 'r') as f:
         line = f.readline()
         count_line = 0
-        
-        try:
-            conn = psycopg2.connect("dbname='business' user='postgres' host='localhost' password:'project'")
-        except:
-            print('ERROR: Could not connect to database :(')
+    
+        conn = psycopg2.connect("dbname='business' user='postgres' host='localhost' password='project'")
+      
         current = conn.cursor()
         
         while line:
             data = json.loads(line)
             time = data['yelping_since'].split(' ')
             
-            users = "INSERT INTO Users(averageStars, cool, funny, totalLikes, fans, user_latitude, user_longitude, username, totalTips, useful, user_id, accountDate" \
-                "startInYelp, latitude, longitude)" "VALUES (" + str(data["average_stars"]) + "," + str(data["cool"]) + "," + str(data["funny"]) + ", 0," \
+            users = "INSERT INTO UserInfo(averageStars, cool, funny, totalLikes, fans, user_latitude, user_longitude, username, totalTips, useful, user_id, accountDate," \
+                "accountTime)" "VALUES (" + str(data["average_stars"]) + "," + str(data["cool"]) + "," + str(data["funny"]) + ", 0," \
                 + str(data["fans"]) + ", '0', '0','" + cleanStr4SQL(data["name"]) + "'," + str(data["tipcount"]) + "," + str(data["useful"]) + ",'" + cleanStr4SQL(data["user_id"]) + \
-                    "','" + str(time[0]) + "','" + str(time[1]) + "'0, 0);"
+                    "','" + str(time[0]) + "','" + str(time[1]) + "0, 0');"
                     
             try:
                 current.execute(users)
             except:
-                print("ERROR: INSERT to users unsuccessful")
-                print(users)
+                conn.commit()
+                
             conn.commit()
             
             line = f.readline()
@@ -55,10 +54,9 @@ def tipsTableParse():
         line = f.readline()
         count_line = 0
         
-        try:
-            conn = psycopg2.connect("dbname='business' user='postgres' host='localhost' password='project'")
-        except:
-            print("ERROR: Connection to database unsuccessful :(")
+        
+        conn = psycopg2.connect("dbname='business' user='postgres' host='localhost' password='project'")
+       
         current = conn.cursor()
         
         while line:
@@ -67,14 +65,16 @@ def tipsTableParse():
             
             tips = "INSERT INTO Tips(business_id, user_id, likesCount, textOfTips, dateOfTips, timeOfTips)" \
                 "VALUES ('" + cleanStr4SQL(data["business_id"]) + "','" + cleanStr4SQL(data["user_id"]) + "'," + str(data["likes"]) + ",'" + \
-                    cleanStr4SQL(data["text"].encode('unicode_escape').decode('unicode_escape')) + "','" + cleanStr4SQL(time[0]) + "','" + \
+                    cleanStr4SQL(data["text"]) + "','" + cleanStr4SQL(time[0]) + "','" + \
                     cleanStr4SQL(time[1]) + "');"
             
             try:
                 current.execute(tips)
             except:
-                print("ERROR: INSERT to tips unsuccessful")
-                print(tips)
+                conn.commit()
+                line = f.readline()
+                count_line = count_line + 1
+                
             conn.commit()
         
             line = f.readline()
@@ -91,28 +91,26 @@ def checkInTableParse():
         line = f.readline()
         count_line = 0
         
-        try:
-            conn = psycopg2.connect("dbname='business' user='postgres' host='localhost' password='project'")
-        except:
-            print('ERROR: Connection To Database Unsuccessful')
+        conn = psycopg2.connect("dbname='business' user='postgres' host='localhost' password='project'")
+       
         current = conn.cursor()
         
         while line:
             data = json.loads(line)
-            time = data['date'].split(' ')
+            time = data['date'].split(',')
             
             for t in time:
                 time = t.split(' ')
                 date = time[0].split('-')
-                
                 checkIn = "INSERT INTO CheckIn(business_id, yearOfCheckIn, dateOfCheckIn, monthOfCheckIn, timeOfCheckIn) " "VALUES ('" + cleanStr4SQL(data["business_id"]) +\
-                    "','" + str(date[0]) + "'," + str(date[2]) + ",'" + cleanStr4SQL(date[1]) + "','" + cleanStr4SQL(time[1]) + "');"
+                    "','" + str(date[0]) + "'," + str(date[1]) + ",'" + cleanStr4SQL(date[2]) + "','" + cleanStr4SQL(time[1]) + "');"
                 
                 try:
                     current.execute(checkIn)
                 except:
-                    print("ERROR: INSERT to Check In table unsuccessful")
-                    print(checkIn)
+                    conn.commit()
+                    line = f.readline()
+                    count_line = count_line + 1
                 conn.commit()
                 
             line = f.readline()
@@ -130,10 +128,8 @@ def friendTableParse():
         line = f.readline()
         count_line = 0
         
-        try:
-            conn = psycopg2.connect("dbname='business' user='postgres' host='localhost' password='project'")
-        except:
-            print("ERROR: Connection to Database Unsuccessful")
+        
+        conn = psycopg2.connect("dbname='business' user='postgres' host='localhost' password='project'")
         current = conn.cursor()
         
         while line:
@@ -142,12 +138,15 @@ def friendTableParse():
             for friend in data['friends']:
                 friend = "INSERT INTO Friend(user_id, friend_id)" "VALUES ('" + cleanStr4SQL(data["user_id"]) + "','" + cleanStr4SQL(friend) + "');"
                 
+                
                 try:
                     current.execute(friend)
                 except:
-                    print("ERROR: INSERT to Friend Table Unsuccessful")
-                    print(friend)
-                conn.commit()
+                    conn.commit()
+                    line = f.readline()
+                    count_line = count_line + 1
+                    
+            conn.commit()
                 
             line = f.readline()
             count_line = count_line + 1
@@ -243,10 +242,9 @@ def insertBusinessTable():
         line = f.readline()
         count_line = 0
         
-        try:
-            conn = psycopg2.connect("dbname='business' user='postgres' host='localhost' password='project'")
-        except:
-            print("ERROR: Connection to Database Unsuccessful")
+        conn = psycopg2.connect("dbname='business' user='postgres' host='localhost' password='project'")
+        print("Now in Database")
+            
         current = conn.cursor()
         
         while line: 
@@ -255,30 +253,30 @@ def insertBusinessTable():
                 VALUES ('" + cleanStr4SQL(data['business_id']) + "','" + cleanStr4SQL(data["name"]) + "','" + cleanStr4SQL(data["address"]) + "','" + \
                     cleanStr4SQL(data["state"]) + "','" + cleanStr4SQL(data["city"]) + "','" + data["postal_code"] + "'," + str(data["latitude"]) + "," + \
                         str(data["longitude"]) + "," + str(data["stars"]) +", 0 , 0 ," + str(data["is_open"]) + ", 0 );"
+            
             try:
-                current.execute(business)
+               current.execute(business)
             except:
-                print("ERROR: INSERT to Business Table Unsuccessful")
-                system.exit()
+               conn.commit()
             conn.commit()
             
             categories = data["categories"].split(', ')
             for c in categories:
                 business_category = "INSERT INTO Categories(business_id, category_name) VALUES ('" + data['business_id'] + "', '" + cleanStr4SQL(str(c)) + "'""); "
                 
+                
                 try:
                     current.execute(business_category)
                 except:
-                    print("ERROR: INSERT to Business Category Table Unsuccesful")
-                    print(business_category)
+                    conn.commit()
                 conn.commit()
-                
+                                
             flat = flatten(data["attributes"])
             for k, v in flat.items():
                 if(k and v):
                     if(k.startswith("GoodForMeal")):
                         if(k == 'GoodForMeal'):
-                            updatedKey = (k, k)
+                            updatedKey = k.split("_")
                         else:
                             updatedKey = k.split('_')
                         if (v == 'None'):
@@ -287,11 +285,13 @@ def insertBusinessTable():
                             updatedValue = v
                             meal = "INSERT INTO GoodMeals(business_id, typeOfMeal, valueOfGoodMeals) VALUES ('" + data['business_id'] + "','" + str(updatedKey[1]) + \
                                 "'," + cleanStr4SQL(str(updatedValue)) + "); "
+                        
                         try:
                             current.execute(meal)
+                            
                         except:
-                            print("ERROR: INSERT to Categories Table Unsuccessful")
-                            print(meal)
+                            conn.commit()
+                        conn.commit()
                             
                     elif(k.startswith("Ambience")):
                         if(k == 'Ambience'):
@@ -304,11 +304,14 @@ def insertBusinessTable():
                             updatedValue = v
                             ambience = "INSERT INTO Ambience(business_id, typeOfAmbience, valueOfAmbience) VALUES ('" + data['business_id'] + "','" + str(updatedKey[1]) + "'," + \
                                 cleanStr4SQL(str(updatedValue)) + ");"
+            
                         try:
                             current.execute(ambience)
+                            
                         except:
-                            print("ERROR: INSERT Into Ambience Unsuccessful")
-                            print(ambience)
+                            conn.commit()
+                        conn.commit()
+                            
                     elif(k.startswith('BusinessParking')):
                         if(k == 'BusinessParking'):
                             updatedKey = (k, k)
@@ -321,33 +324,35 @@ def insertBusinessTable():
                         
                         parking = "INSERT INTO parking(business_id, typeOfParking, valueOfParking) VALUES ('" + data['business_id'] + "','" + str(updatedKey[1]) + "'," + \
                             cleanStr4SQL(str(updatedValue)) + ");"
+            
                         try:
                             current.execute(parking)
                         except:
-                            print("ERROR: INSERT into Parking Unsuccessful")
-                            print(parking)
-                        
+                            conn.commit()
+                        conn.commit()
                     else:
                         attribute = "INSERT INTO Attributes(business_id, nameOfAttribute, valueOfAttribute) VALUES ('" + data['business_id'] + "','" + str(k) + "', '" \
                             + cleanStr4SQL(str(v)) + "'""); "
+                        
                         try:
                             current.execute(attribute)
                         except:
-                            print("ERROR: INSERT into Attributes Unsuccessful")
-                            print(attribute)
+                            conn.commit()
+                            
                     conn.commit()
                     
             hours = []
             for k, v in data['hours'].items():
                 if(k and v):
-                    time = v.split('-')
+                    time = v.split(' ')
                     hours = "INSERT INTO HoursOfBusiness(business_id, dayOfBusiness, openTime, closeTime) VALUES ('" + data['business_id'] + "','" + str(k) + "','" \
                         + cleanStr4SQL(str(time[0])) + "','" + cleanStr4SQL(str(time[0])) + "'""); "
                     try:
                         current.execute(hours)
                     except:
-                        print("ERROR: INSERT into Hours Unsuccessful")
-                        print(hours)
+                        conn.commit()
+                        line = f.readline()
+                        count_line = count_line + 1
                 conn.commit()
                 
             line = f.readline()
@@ -358,8 +363,12 @@ def insertBusinessTable():
             
         
 if __name__ == "__main__":
-    insertBusinessTable()                       
-                        
+    usersTableParse()
+    insertBusinessTable()  
+    checkInTableParse()
+    tipsTableParse()
+    friendTableParse()                      
+    print("ALERT: Now Done")                  
                                                                                         
                                                                                                  
             
