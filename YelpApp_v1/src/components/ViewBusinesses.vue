@@ -93,7 +93,7 @@ export default {
         },
 
         redirectToCreateTestPackage() {
-            this.$router.push({ path: '/createtestpackage' });
+            this.$router.push({ path: '/display' });
         },
     }
 }

@@ -6,6 +6,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 import VueRouter from 'vue-router';
 import VeeValidate from 'vee-validate';
+import axios from 'axios';
 
 Vue.use(BootstrapVue);
 Vue.use(IconsPlugin);
@@ -19,8 +20,10 @@ Vue.use(MdContent);
 Vue.config.productionTip = false;
 
 import store from './store';
+import fix from './fix'
 
 new Vue({
   render: (h) => h(App),
-  store,
+  store
+
 }).$mount('#app');

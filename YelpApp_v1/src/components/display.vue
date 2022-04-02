@@ -15,8 +15,8 @@
       <template #row-details="row">
         <b-card>
           <b-row class="mb-2">
-            <b-col sm="3" class="text-sm-right"><b>Age:</b></b-col>
-            <b-col>{{ row.item.age }}</b-col>
+            <b-col sm="3" class="text-sm-right"><b>Cities:</b></b-col>
+            <b-col>{{ row.item.cities }}</b-col>
           </b-row>
 
           <b-row class="mb-2">
@@ -35,18 +35,17 @@
   export default {
     data() {
       return {
-        fields: ['first_name', 'last_name', 'show_details'],
+        fields: ['State', '', 'show_details'],
         items: [
-          { isActive: true, age: 40, first_name: 'Dickerson', last_name: 'Macdonald' },
-          { isActive: false, age: 21, first_name: 'Larsen', last_name: 'Shaw' },
+          { isActive: true, Cities: 40, State: 'Washington' },
+          { isActive: true, Cities: 21, State: 'Oregon'},
           {
-            isActive: false,
-            age: 89,
-            first_name: 'Geneva',
-            last_name: 'Wilson',
+            isActive: true,
+            Cities: 89,
+            State: 'Idaho',
             _showDetails: true
           },
-          { isActive: true, age: 38, first_name: 'Jami', last_name: 'Carney' }
+          { isActive: true, Cities: '62', State: 'California'}
         ]
       }
     }

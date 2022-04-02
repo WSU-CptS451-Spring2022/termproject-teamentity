@@ -12,7 +12,7 @@
       <b-nav-item><b-icon icon="house" style="padding-right:2px"></b-icon><router-link to="/" style="color:darkgray">Home</router-link></b-nav-item>
 
       <!-- Link to Show Business Page -->
-      <b-nav-item><router-link to="/Businesses" style="color:darkgray">Businesses</router-link></b-nav-item>
+      <b-nav-item><router-link to="/display" style="color:darkgray">Catagories</router-link></b-nav-item>
 
     </b-navbar-nav>
     
