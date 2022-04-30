@@ -68,17 +68,13 @@ def tipsTableParse():
                     cleanStr4SQL(data["text"]) + "','" + cleanStr4SQL(time[0]) + "','" + \
                     cleanStr4SQL(time[1]) + "');"
             
-            try:
-                current.execute(tips)
-            except:
-                conn.commit()
-                line = f.readline()
-                count_line = count_line + 1
-                
+            
+            current.execute(tips)
+            
             conn.commit()
-        
             line = f.readline()
             count_line = count_line + 1
+        
         
         current.close()
         conn.close()
@@ -105,16 +101,14 @@ def checkInTableParse():
                 checkIn = "INSERT INTO CheckIn(business_id, yearOfCheckIn, dateOfCheckIn, monthOfCheckIn, timeOfCheckIn) " "VALUES ('" + cleanStr4SQL(data["business_id"]) +\
                     "','" + str(date[0]) + "'," + str(date[1]) + ",'" + cleanStr4SQL(date[2]) + "','" + cleanStr4SQL(time[1]) + "');"
                 
-                try:
-                    current.execute(checkIn)
-                except:
-                    conn.commit()
-                    line = f.readline()
-                    count_line = count_line + 1
+    
+                current.execute(checkIn)
                 conn.commit()
+            
+                count_line = count_line + 1
+                
                 
             line = f.readline()
-            count_line = count_line + 1
             
         current.close()
         conn.close()
@@ -138,19 +132,12 @@ def friendTableParse():
             for friend in data['friends']:
                 friend = "INSERT INTO Friend(user_id, friend_id)" "VALUES ('" + cleanStr4SQL(data["user_id"]) + "','" + cleanStr4SQL(friend) + "');"
                 
+                current.execute(friend)
+                conn.commit()
                 
-                try:
-                    current.execute(friend)
-                except:
-                    conn.commit()
-                    line = f.readline()
-                    count_line = count_line + 1
+                count_line = count_line + 1
                     
-            conn.commit()
-                
-            line = f.readline()
-            count_line = count_line + 1
-            
+            line = f.readline()   
         current.close()
         conn.close()
         
@@ -235,42 +222,43 @@ def parseTipData():
         print(lineCount)
         outfile.close()
         infile.close()
-        
-def insertBusinessTable():
-    print("ALERT: Beginning INSERT to Business Table Function ")
+def insertCategories():
+    print("ALERT: Now Beginning parse fo Categories")
     with open('yelp_business.JSON', 'r') as f:
         line = f.readline()
         count_line = 0
         
         conn = psycopg2.connect("dbname='business' user='postgres' host='localhost' password='project'")
-        print("Now in Database")
-            
         current = conn.cursor()
         
-        while line: 
+        while line:
             data = json.loads(line)
-            business = "INSERT INTO Business(business_id, business_name, addressOfBusiness, stateOfBusiness, city, zipCode, latitude, longitude, stars, numCheckins, numberTips, ifopen, reviewCount)  \
-                VALUES ('" + cleanStr4SQL(data['business_id']) + "','" + cleanStr4SQL(data["name"]) + "','" + cleanStr4SQL(data["address"]) + "','" + \
-                    cleanStr4SQL(data["state"]) + "','" + cleanStr4SQL(data["city"]) + "','" + data["postal_code"] + "'," + str(data["latitude"]) + "," + \
-                        str(data["longitude"]) + "," + str(data["stars"]) +", 0 , 0 ," + str(data["is_open"]) + ", 0 );"
-            
-            try:
-               current.execute(business)
-            except:
-               conn.commit()
-            conn.commit()
-            
             categories = data["categories"].split(', ')
             for c in categories:
                 business_category = "INSERT INTO Categories(business_id, category_name) VALUES ('" + data['business_id'] + "', '" + cleanStr4SQL(str(c)) + "'""); "
                 
-                
-                try:
-                    current.execute(business_category)
-                except:
-                    conn.commit()
+
+                current.execute(business_category)
                 conn.commit()
-                                
+                
+                count_line = count_line + 1
+                    
+            line = f.readline()
+            
+    print(count_line)
+    f.close()
+
+def insertAttributes():
+    print("ALERT: Now Beginning parse for Attributes")
+    with open('yelp_business.JSON', 'r') as f:
+        line = f.readline()
+        count_line = 0
+        
+        conn = psycopg2.connect("dbname='business' user='postgres' host='localhost' password='project'")
+        current = conn.cursor()
+        
+        while line:
+            data = json.loads(line)
             flat = flatten(data["attributes"])
             for k, v in flat.items():
                 if(k and v):
@@ -286,12 +274,11 @@ def insertBusinessTable():
                             meal = "INSERT INTO GoodMeals(business_id, typeOfMeal, valueOfGoodMeals) VALUES ('" + data['business_id'] + "','" + str(updatedKey[1]) + \
                                 "'," + cleanStr4SQL(str(updatedValue)) + "); "
                         
-                        try:
+                        
                             current.execute(meal)
-                            
-                        except:
                             conn.commit()
-                        conn.commit()
+                            count_line = count_line + 1
+                        
                             
                     elif(k.startswith("Ambience")):
                         if(k == 'Ambience'):
@@ -304,13 +291,11 @@ def insertBusinessTable():
                             updatedValue = v
                             ambience = "INSERT INTO Ambience(business_id, typeOfAmbience, valueOfAmbience) VALUES ('" + data['business_id'] + "','" + str(updatedKey[1]) + "'," + \
                                 cleanStr4SQL(str(updatedValue)) + ");"
-            
-                        try:
+                        
+                        
                             current.execute(ambience)
-                            
-                        except:
                             conn.commit()
-                        conn.commit()
+                            count_line = count_line + 1
                             
                     elif(k.startswith('BusinessParking')):
                         if(k == 'BusinessParking'):
@@ -322,49 +307,103 @@ def insertBusinessTable():
                         else:
                             updatedValue = v
                         
-                        parking = "INSERT INTO parking(business_id, typeOfParking, valueOfParking) VALUES ('" + data['business_id'] + "','" + str(updatedKey[1]) + "'," + \
+                            parking = "INSERT INTO parking(business_id, typeOfParking, valueOfParking) VALUES ('" + data['business_id'] + "','" + str(updatedKey[1]) + "'," + \
                             cleanStr4SQL(str(updatedValue)) + ");"
-            
-                        try:
+                        
+                        
                             current.execute(parking)
-                        except:
                             conn.commit()
-                        conn.commit()
+                            count_line = count_line + 1
+                            
                     else:
                         attribute = "INSERT INTO Attributes(business_id, nameOfAttribute, valueOfAttribute) VALUES ('" + data['business_id'] + "','" + str(k) + "', '" \
                             + cleanStr4SQL(str(v)) + "'""); "
                         
-                        try:
-                            current.execute(attribute)
-                        except:
-                            conn.commit()
-                            
-                    conn.commit()
-                    
+                        
+                        current.execute(attribute)
+                        conn.commit()
+                        
+                        count_line = count_line + 1
+             
+            line = f.readline()
+    
+            
+    current.close()
+    conn.close()
+    print(count_line)
+    f.close()
+    
+def insertHours():
+    print("ALERT: Now Beginning parse for Hours")
+    with open('yelp_business.JSON', 'r') as f:
+        line = f.readline()
+        count_line = 0
+        
+        conn = psycopg2.connect("dbname='business' user='postgres' host='localhost' password='project'")
+        current = conn.cursor()
+        while line:
+            data = json.loads(line)
             hours = []
             for k, v in data['hours'].items():
                 if(k and v):
                     time = v.split(' ')
                     hours = "INSERT INTO HoursOfBusiness(business_id, dayOfBusiness, openTime, closeTime) VALUES ('" + data['business_id'] + "','" + str(k) + "','" \
                         + cleanStr4SQL(str(time[0])) + "','" + cleanStr4SQL(str(time[0])) + "'""); "
-                    try:
-                        current.execute(hours)
-                    except:
-                        conn.commit()
-                        line = f.readline()
-                        count_line = count_line + 1
+                    
+                    current.execute(hours)
+                    conn.commit()
+                    
+                    count_line = count_line + 1
+            
+            
+            line = f.readline()
+    current.close()
+    conn.close()
+    print(count_line)
+    f.close()
+                            
+    
+def insertBusinessTable():
+    print("ALERT: Beginning INSERT to Business Table Function ")
+    with open('yelp_business.JSON', 'r') as f:
+        line = f.readline()
+        count_line = 0
+        
+        conn = psycopg2.connect("dbname='business' user='postgres' host='localhost' password='project'")
+        print("Now in Database")
+            
+        current = conn.cursor()
+        
+        while line: 
+            data = json.loads(line)
+            business = "INSERT INTO Business(business_id, business_name, addressOfBusiness, stateOfBusiness, city, zipCode, latitude, longitude, stars, numCheckins, numberTips, ifopen, reviewCount)"\
+                "VALUES ('" + cleanStr4SQL(data['business_id']) + "','" + cleanStr4SQL(data["name"]) + "','" + cleanStr4SQL(data["address"]) + "','" + \
+                    cleanStr4SQL(data["state"]) + "','" + cleanStr4SQL(data["city"]) + "','" + data["postal_code"] + "'," + str(data["latitude"]) + "," + \
+                        str(data["longitude"]) + "," + str(data["stars"]) +", 0 , 0 ," + str(data["is_open"]) + ", 0 );"
+    
+            try:
+               current.execute(business)
+            except:
                 conn.commit()
-                
+                line = f.readline()
+                count_line = count_line + 1
+            
+            conn.commit()
             line = f.readline()
             count_line = count_line + 1
             
-        print(count_line)
-        f.close()
+    current.close()
+    conn.close()
+    print(count_line)
+    f.close()
             
         
 if __name__ == "__main__":
     usersTableParse()
-    insertBusinessTable()  
+    insertBusinessTable()   
+    insertCategories()
+    insertAttributes()
+    insertHours()  
     checkInTableParse()
     tipsTableParse()
     friendTableParse()                      
