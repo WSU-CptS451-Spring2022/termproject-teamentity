@@ -1,4 +1,4 @@
-const pool = require('./queries.js');
+const pool = require('./configuration.js');
 
 
 const getState = (request, response) => {
