@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<title>Yelp App</title>
+		<!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag -->
+		<meta
+			http-equiv="Content-Security-Policy"
+			content="script-src 'self' 'unsafe-inline';"
+		/>
+		<link rel="stylesheet" href="businessView.css" />
+		<link
+			rel="stylesheet"
+			href="node_modules/bootstrap/dist/css/bootstrap.min.css"
+		/>
+		<script>
+			if (typeof module === "object") {
+				window.module = module;
+				module = undefined;
+			}
+		</script>
+
+		<script src="node_modules//jquery/dist/jquery.min.js"></script>
+		<script src="src/js/businessView.js"></script>
+		<script src="src/js/app.js"></script>
+
+		<script>
+			if (window.module) module = window.module;
+		</script>
+	</head>
+	<header>
+		<div class="navbar">
+			<ul>
+				<li>
+					<a style="color: grey !important; font-weight: bold;"
+						>Yelp Application: Brandon Luy & Brian Lopez</a>
+				</li>
+				<img src="yelp.png" alt="">
+				<li><a id="userView_link">User </a></li>
+				<li>
+					<a id="businessView_link" class="active">Business </a>
+				</li>
+			</ul>
+		</div>
+	</header>
+	<body>
+		<div class="flex-container">
+			<div id="option-menu">
+				<div>
+					<h3>Select state:</h3>
+					<select id="states" class="selection-list">
+						<option disabled selected value> -- select an option -- </option>
+					</select>
+				</div>
+				<div>
+					<h3>Select cities:</h3>
+					<select id="cities" size="4" class="selection-list"> </select>
+				</div>
+				<div>
+					<h3>Select zipcode:</h3>
+					<select id="zipcode" size="4" class="selection-list"> </select>
+				</div>
+			</div>
+			<div>
+				<h3>Sort By:</h3>
+				<select id="sortBy" size="4">
+					<option selected value="business_name">Name Ascending</option>
+					<option value="stars DESC">Highest Rated</option>
+					<option value="num_tips DESC">Most Tips</option>
+					<option value="num_checkins DESC">Most Checkins</option>
+					<option value="dist DESC">Nearest</option>
+				</select>
+			</div>
+			<div>
+				<h3>Select Business Catagories:</h3>
+				<select id="category_name" size="4" multiple class="selection-list">
+				</select>
+			</div>
+			<div>
+				<table class="table" id="business-table">
+					<thead>
+						<tr id="business-table-columns">
+							<!--<th scope="col">#</th>
+							<th scope="col">First</th>
+							<th scope="col">Last</th>
+							<th scope="col">Handle</th>-->
+						</tr>
+					</thead>
+					<tbody id="business-table-entries">
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</body>
+</html>
