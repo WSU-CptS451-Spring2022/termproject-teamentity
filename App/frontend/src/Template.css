@@ -1,0 +1,50 @@
+header {
+  display: flex;
+  width: 90%;
+  height: 10vh;
+  margin: auto;
+  align-self: stretch;
+}
+
+.logo-container,
+.nav-links {
+  display: flex;
+  flex-direction: row;
+}
+
+.logo-container {
+  flex: 1;
+  align-items: center;
+}
+
+.logoImg {
+  width: 3rem;
+  height: 7rem;
+}
+
+.logo {
+  font-weight: 400;
+  margin: 5px;
+}
+
+nav {
+  display: flex;
+  justify-content: flex-end;
+  align-items: right;
+  flex: 0 0 20%;
+}
+
+.nav-links {
+  justify-content: space-around;
+
+}
+
+.nav-link {
+  color: #5f5f79;
+  font-size: 18px;
+  text-decoration: none;
+}
+
+.userButton {
+  color: red;
+}
